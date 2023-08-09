@@ -11,5 +11,4 @@
 - Shibboleth
 {% elsif ghae %}
 - Azure Active Directory (Azure AD)
-- Okta (beta)
 {% endif %}

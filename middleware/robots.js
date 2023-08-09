@@ -1,5 +1,3 @@
-import { defaultCacheControl } from './cache-control.js'
-
 const defaultResponse = 'User-agent: *'
 
 const disallowAll = `User-agent: *
@@ -10,12 +8,14 @@ export default function robots(req, res, next) {
 
   res.type('text/plain')
 
-  defaultCacheControl(res)
+  // remove subdomain from host
+  // docs-internal-12345--branch-name.herokuapp.com -> herokuapp.com
+  const rootDomain = req.hostname.split('.').slice(1).join('.')
 
-  // only include robots.txt when it's our production domain and adding localhost for robots-txt.js test
-  if (req.hostname === 'docs.github.com' || req.hostname === '127.0.0.1') {
-    return res.send(defaultResponse)
+  // prevent crawlers from indexing staging apps
+  if (rootDomain === 'herokuapp.com') {
+    return res.send(disallowAll)
   }
 
-  return res.send(disallowAll)
+  return res.send(defaultResponse)
 }

@@ -1,1 +1,1 @@
-1. Read about the changed repository access permissions.
+8. Read about the changed repository access permissions.

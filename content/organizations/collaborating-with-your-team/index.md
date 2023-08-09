@@ -6,7 +6,10 @@ redirect_from:
   - /github/building-a-strong-community/collaborating-with-your-team
   - /github/setting-up-and-managing-organizations-and-teams/collaborating-with-your-team
 versions:
-  feature: team-discussions
+  fpt: '*'
+  ghes: '*'
+  ghae: '*'
+  ghec: '*'
 topics:
   - Community
 children:
@@ -17,6 +20,3 @@ children:
 shortTitle: Collaborate with your team
 ---
 
-{% ifversion team-discussions-migration %}
-{% data reusables.organizations.team-discussions-migration %}
-{% endif %}

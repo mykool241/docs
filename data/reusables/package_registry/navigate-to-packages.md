@@ -1,1 +1,2 @@
-1. Search for and then click the name of the package that you want to view.
+1. Click the name of the package that you want to view.
+![Package name](/assets/images/help/package-registry/package-name.png)

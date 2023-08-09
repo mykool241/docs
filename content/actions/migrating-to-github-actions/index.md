@@ -1,6 +1,6 @@
 ---
 title: Migrating to GitHub Actions
-shortTitle: Migrate to GitHub Actions
+shortTitle: Migrating to GitHub Actions
 intro: 'Learn how to migrate your existing CI/CD workflows to {% data variables.product.prodname_actions %}.'
 versions:
   fpt: '*'
@@ -8,9 +8,14 @@ versions:
   ghae: '*'
   ghec: '*'
 redirect_from:
-  - /articles/migrating-github-actions-from-hcl-syntax-to-yaml-syntax
+  - /actions/migrating-to-github-actions
+  - /articles/migrating-github-actions-from-hcl-syntax-to-yaml-syntax/
 children:
-  - /automated-migrations
-  - /manually-migrating-to-github-actions
+  - /migrating-from-azure-pipelines-to-github-actions
+  - /migrating-from-circleci-to-github-actions
+  - /migrating-from-gitlab-cicd-to-github-actions
+  - /migrating-from-jenkins-to-github-actions
+  - /migrating-from-travis-ci-to-github-actions
 ---
 
+{% data reusables.actions.ae-beta %}

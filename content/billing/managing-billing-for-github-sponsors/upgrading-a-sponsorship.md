@@ -13,6 +13,7 @@ topics:
   - Sponsors
   - Upgrades
 ---
+{% data reusables.sponsors.org-sponsors-release-phase %} 
 
 ## About sponsorship upgrades
 

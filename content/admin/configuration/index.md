@@ -1,10 +1,9 @@
 ---
 title: Configuring GitHub Enterprise
-shortTitle: Configure GitHub Enterprise
+shortTitle: Configuring GitHub Enterprise
 intro: You can configure your enterprise to suit your organization's needs.
 redirect_from:
   - /enterprise/admin/configuration
-  - /admin/configuration/configuring-your-enterprise
 versions:
   ghec: '*'
   ghes: '*'
@@ -12,16 +11,14 @@ versions:
 topics:
   - Enterprise
 children:
-  - /administering-your-instance-from-the-management-console
-  - /configuring-user-applications-for-your-enterprise
-  - /hardening-security-for-your-enterprise
+  - /configuring-your-enterprise
   - /configuring-network-settings
-  - /configuring-github-connect
+  - /managing-connections-between-your-enterprise-accounts
 ---
 {% ifversion ghes %}
 {% note %}
 
-**Note:** To configure {% data variables.product.prodname_actions %} or {% data variables.product.prodname_registry %} for your enterprise, see "[AUTOTITLE](/admin/github-actions)" or "[AUTOTITLE](/admin/packages)."
+**Note:** To configure {% data variables.product.prodname_actions %} or {% data variables.product.prodname_registry %} for your enterprise, see "[Managing GitHub Actions for your enterprise](/admin/github-actions)" or "[Managing GitHub Packages for your enterprise](/admin/packages)."
 
 {% endnote %}
 {% endif %}

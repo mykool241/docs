@@ -1,1 +1,1 @@
-1. The instance will restart automatically.
+4. The instance will restart automatically.

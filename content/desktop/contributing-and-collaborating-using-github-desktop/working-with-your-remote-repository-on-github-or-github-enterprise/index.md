@@ -4,13 +4,11 @@ intro: 'As you make changes to your project locally, you can keep them up-to-dat
 redirect_from:
   - /desktop/contributing-to-projects/working-with-your-remote-repository-on-github-or-github-enterprise
 versions:
-  feature: desktop
+  fpt: '*'
 children:
-  - /creating-an-issue-or-pull-request-from-github-desktop
+  - /creating-an-issue-or-pull-request
   - /viewing-a-pull-request-in-github-desktop
-  - /viewing-and-re-running-checks-in-github-desktop
-  - /configuring-notifications-in-github-desktop
-  - /changing-the-remote-url-for-a-repository-in-github-desktop
+  - /changing-a-remotes-url-from-github-desktop
 shortTitle: Work with your remote repo
 ---
 

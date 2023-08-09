@@ -1,1 +1,2 @@
-1. Under "{% octicon "law" aria-hidden="true" %} Policies", click **Projects**.
+1. In the left sidebar, click **Projects**.
+  ![Projects tab in the enterprise account settings sidebar](/assets/images/help/business-accounts/settings-projects-tab.png)

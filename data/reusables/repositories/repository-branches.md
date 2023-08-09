@@ -1,1 +1,2 @@
-1. In the "Code and automation" section of the sidebar, click **{% octicon "git-branch" aria-hidden="true" %} Branches**.
+1. In the left menu, click **Branches**.
+![Repository options sub-menu](/assets/images/help/repository/repository-options-branch.png)

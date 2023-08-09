@@ -1,13 +1,11 @@
-// eslint-disable-next-line import/no-extraneous-dependencies
 import { graphql } from '@octokit/graphql'
 
 import {
   addItemToProject,
   isDocsTeamMember,
-  isGitHubOrgMember,
   findFieldID,
   findSingleSelectID,
-  generateUpdateProjectV2ItemFieldMutation,
+  generateUpdateProjectNextItemFieldMutation,
 } from './projects.js'
 
 async function run() {
@@ -16,22 +14,13 @@ async function run() {
     `
       query ($organization: String!, $projectNumber: Int!, $id: ID!) {
         organization(login: $organization) {
-          projectV2(number: $projectNumber) {
+          projectNext(number: $projectNumber) {
             id
-            fields(first: 100) {
+            fields(first: 20) {
               nodes {
-                ... on ProjectV2Field {
-                  id
-                  name
-                }
-                ... on ProjectV2SingleSelectField {
-                  id
-                  name
-                  options {
-                    id
-                    name
-                  }
-                }
+                id
+                name
+                settings
               }
             }
           }
@@ -56,12 +45,13 @@ async function run() {
       projectNumber: parseInt(process.env.PROJECT_NUMBER),
       headers: {
         authorization: `token ${process.env.TOKEN}`,
+        'GraphQL-Features': 'projects_next_graphql',
       },
-    },
+    }
   )
 
   // Get the project ID
-  const projectID = data.organization.projectV2.id
+  const projectID = data.organization.projectNext.id
 
   // Get the ID of the fields that we want to populate
   const datePostedID = findFieldID('Date posted', data)
@@ -70,7 +60,7 @@ async function run() {
   const featureID = findFieldID('Feature', data)
   const contributorTypeID = findFieldID('Contributor type', data)
   const sizeTypeID = findFieldID('Size', data)
-  const authorID = findFieldID('Contributor', data)
+  const authorID = findFieldID('Author', data)
 
   // Get the ID of the single select values that we want to set
   const readyForReviewID = findSingleSelectID('Ready for review', 'Status', data)
@@ -87,7 +77,7 @@ async function run() {
 
   // If the item is a PR, determine the feature and size
   let feature = ''
-  let sizeType = sizeS // We need to set something in case this is an issue
+  let sizeType = '' // You don't need to use a field ID if you want the value to be empty
   if (data.item.__typename === 'PullRequest') {
     // Get the
     // - number of files changed
@@ -95,8 +85,8 @@ async function run() {
     // - affected docs sets (not considering changes to data/assets)
     let numFiles = 0
     let numChanges = 0
-    const features = new Set([])
-    data.item.files.nodes.forEach((node) => {
+    let features = new Set([])
+    const files = data.item.files.nodes.forEach((node) => {
       numFiles += 1
       numChanges += node.additions
       numChanges += node.deletions
@@ -157,17 +147,17 @@ async function run() {
         headers: {
           authorization: `token ${process.env.TOKEN}`,
         },
-      },
+      }
     )
     const docsPRData =
       contributorData.user.contributionsCollection.pullRequestContributionsByRepository.filter(
-        (item) => item.repository.nameWithOwner === 'github/docs',
+        (item) => item.repository.nameWithOwner === 'github/docs'
       )[0]
     const prCount = docsPRData ? docsPRData.contributions.totalCount : 0
 
     const docsIssueData =
       contributorData.user.contributionsCollection.issueContributionsByRepository.filter(
-        (item) => item.repository.nameWithOwner === 'github/docs',
+        (item) => item.repository.nameWithOwner === 'github/docs'
       )[0]
     const issueCount = docsIssueData ? docsIssueData.contributions.totalCount : 0
 
@@ -177,42 +167,40 @@ async function run() {
   }
   const turnaround = process.env.REPO === 'github/docs' ? 3 : 2
   // Generate a mutation to populate fields for the new project item
-  const updateProjectV2ItemMutation = generateUpdateProjectV2ItemFieldMutation({
+  const updateProjectNextItemMutation = generateUpdateProjectNextItemFieldMutation({
     item: newItemID,
     author: firstTimeContributor ? 'first time contributor' : process.env.AUTHOR_LOGIN,
-    turnaround,
-    feature,
+    turnaround: turnaround,
+    feature: feature,
   })
 
   // Determine which variable to use for the contributor type
   let contributorType
   if (await isDocsTeamMember(process.env.AUTHOR_LOGIN)) {
     contributorType = docsMemberTypeID
-  } else if (await isGitHubOrgMember(process.env.AUTHOR_LOGIN)) {
-    contributorType = hubberTypeID
   } else if (process.env.REPO === 'github/docs') {
     contributorType = osContributorTypeID
   } else {
-    // use hubber as the fallback so that the PR doesn't get lost on the board
     contributorType = hubberTypeID
   }
 
   console.log(`Populating fields for item: ${newItemID}`)
 
-  await graphql(updateProjectV2ItemMutation, {
+  await graphql(updateProjectNextItemMutation, {
     project: projectID,
-    statusID,
+    statusID: statusID,
     statusValueID: readyForReviewID,
-    datePostedID,
-    reviewDueDateID,
-    contributorTypeID,
-    contributorType,
-    sizeTypeID,
-    sizeType,
-    featureID,
-    authorID,
+    datePostedID: datePostedID,
+    reviewDueDateID: reviewDueDateID,
+    contributorTypeID: contributorTypeID,
+    contributorType: contributorType,
+    sizeTypeID: sizeTypeID,
+    sizeType: sizeType,
+    featureID: featureID,
+    authorID: authorID,
     headers: {
       authorization: `token ${process.env.TOKEN}`,
+      'GraphQL-Features': 'projects_next_graphql',
     },
   })
   console.log('Done populating fields for item')

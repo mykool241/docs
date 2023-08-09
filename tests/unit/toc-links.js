@@ -1,22 +1,21 @@
 import { jest } from '@jest/globals'
-import { loadPageMap, loadPages } from '../../lib/page-data.js'
-import { renderContent } from '#src/content-render/index.js'
-import { allVersions } from '../../lib/all-versions.js'
+import { loadPages } from '../../lib/page-data.js'
+import renderContent from '../../lib/render-content/index.js'
+import { allVersionKeys } from '../../lib/all-versions.js'
 
 describe('toc links', () => {
   jest.setTimeout(3 * 60 * 1000)
 
   test('every toc link works without redirects', async () => {
-    const pageList = await loadPages()
+    const pages = await loadPages()
 
-    const englishIndexPages = pageList.filter(
-      (page) => page.languageCode === 'en' && page.relativePath.endsWith('index.md'),
+    const englishIndexPages = pages.filter(
+      (page) => page.languageCode === 'en' && page.relativePath.endsWith('index.md')
     )
-    const pages = await loadPageMap(pageList)
 
     const issues = []
 
-    for (const pageVersion of Object.keys(allVersions)) {
+    for (const pageVersion of allVersionKeys) {
       for (const page of englishIndexPages) {
         // skip page if it doesn't have a permalink for the current product version
         if (!page.permalinks.some((permalink) => permalink.pageVersion === pageVersion)) continue
@@ -28,7 +27,6 @@ describe('toc links', () => {
           redirects: {},
           currentLanguage: 'en',
           currentVersion: pageVersion,
-          currentVersionObj: allVersions[pageVersion],
         }
 
         // ensure all toc pages can render

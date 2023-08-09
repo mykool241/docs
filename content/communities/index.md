@@ -1,5 +1,5 @@
 ---
-title: Building communities documentation
+title: Building communities
 shortTitle: Building communities
 intro: 'Learn best practices for moderating and setting up collaborative, safe, and effective communities using GitHub’s community-tested tools.'
 redirect_from:
@@ -8,7 +8,7 @@ redirect_from:
 changelog:
   label: wikis
 featuredLinks:
-  startHere:
+  guides:
     - /communities/setting-up-your-project-for-healthy-contributions/setting-guidelines-for-repository-contributors
     - /communities/setting-up-your-project-for-healthy-contributions/adding-a-code-of-conduct-to-your-project
     - /communities/moderating-comments-and-conversations/managing-disruptive-comments

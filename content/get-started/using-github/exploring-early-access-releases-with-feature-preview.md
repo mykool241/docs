@@ -1,6 +1,6 @@
 ---
 title: Exploring early access releases with feature preview
-intro: You can use feature preview to see products or features that are available in beta and to enable or disable each feature for your personal account.
+intro: You can use feature preview to see products or features that are available in beta and to enable or disable each feature for your user account.
 redirect_from:
   - /articles/exploring-early-access-releases-with-feature-preview
   - /github/getting-started-with-github/exploring-early-access-releases-with-feature-preview
@@ -27,5 +27,5 @@ shortTitle: Feature preview
 You can see a list of features that are available in beta and a brief description for each feature. Each feature includes a link to give feedback.
 
 {% data reusables.feature-preview.feature-preview-setting  %}
-1. To view details for a feature, in the left sidebar, click the feature's name.
-1. Optionally, to the right of a feature's name, click **Enable** or **Disable**.
+2. Optionally, to the right of a feature, click **Enable** or **Disable**.
+  ![Enable button in feature preview](/assets/images/help/settings/enable-feature-button.png)

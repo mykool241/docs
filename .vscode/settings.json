@@ -1,4 +1,5 @@
 {
-  "workbench.editor.enablePreview": false,
-  "workbench.editor.enablePreviewFromQuickOpen": false
+  "files.exclude": {
+    "**/translations": true
+  }
 }

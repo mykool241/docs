@@ -1,32 +1,30 @@
 import { useRouter } from 'next/router'
-import dynamic from 'next/dynamic'
 import cx from 'classnames'
-import { LinkExternalIcon } from '@primer/octicons-react'
+import { ActionList, Heading } from '@primer/components'
 
+import { ZapIcon, InfoIcon, ShieldLockIcon } from '@primer/octicons-react'
 import { Callout } from 'components/ui/Callout'
+
+import { Link } from 'components/Link'
 import { DefaultLayout } from 'components/DefaultLayout'
 import { ArticleTitle } from 'components/article/ArticleTitle'
-import { useArticleContext } from 'components/context/ArticleContext'
-import { LearningTrackNav } from 'src/learning-track/components/article/LearningTrackNav'
+import { MiniTocItem, useArticleContext } from 'components/context/ArticleContext'
+import { useTranslation } from 'components/hooks/useTranslation'
+import { LearningTrackNav } from './LearningTrackNav'
 import { MarkdownContent } from 'components/ui/MarkdownContent'
 import { Lead } from 'components/ui/Lead'
-import { PermissionsStatement } from 'components/ui/PermissionsStatement'
 import { ArticleGridLayout } from './ArticleGridLayout'
-import { ArticleInlineLayout } from './ArticleInlineLayout'
-import { PlatformPicker } from 'src/tools/components/PlatformPicker'
-import { ToolPicker } from 'src/tools/components/ToolPicker'
-import { MiniTocs } from 'components/ui/MiniTocs'
-import { LearningTrackCard } from 'src/learning-track/components/article/LearningTrackCard'
-import { RestRedirect } from 'src/rest/components/RestRedirect'
-import { Breadcrumbs } from 'components/page-header/Breadcrumbs'
-import { Link } from 'components/Link'
-import { useTranslation } from 'components/hooks/useTranslation'
-import { LinkPreviewPopover } from 'components/LinkPreviewPopover'
+import { PlatformPicker } from 'components/article/PlatformPicker'
 
-const ClientSideRefresh = dynamic(() => import('components/ClientSideRefresh'), {
-  ssr: false,
-})
-const isDev = process.env.NODE_ENV === 'development'
+// Mapping of a "normal" article to it's interactive counterpart
+const interactiveAlternatives: Record<string, { href: string }> = {
+  '/actions/automating-builds-and-tests/building-and-testing-nodejs': {
+    href: '/actions/automating-builds-and-tests/building-and-testing-nodejs-or-python?langId=nodejs',
+  },
+  '/actions/automating-builds-and-tests/building-and-testing-python': {
+    href: '/actions/automating-builds-and-tests/building-and-testing-nodejs-or-python?langId=python',
+  },
+}
 
 export const ArticlePage = () => {
   const router = useRouter()
@@ -35,107 +33,128 @@ export const ArticlePage = () => {
     intro,
     effectiveDate,
     renderedPage,
+    contributor,
     permissions,
     includesPlatformSpecificContent,
-    includesToolSpecificContent,
     product,
-    productVideoUrl,
     miniTocItems,
     currentLearningTrack,
-    supportPortalVaIframeProps,
-    currentLayout,
   } = useArticleContext()
-  const isLearningPath = !!currentLearningTrack?.trackName
-  const { t } = useTranslation(['pages'])
+  const { t } = useTranslation('pages')
+  const currentPath = router.asPath.split('?')[0]
 
-  const introProp = (
-    <>
-      {intro && (
-        // Note the `_page-intro` is used by the popover preview cards
-        // when it needs this text for in-page links.
-        <Lead data-testid="lead" data-search="lead" className="_page-intro">
-          {intro}
-        </Lead>
-      )}
-
-      {permissions && <PermissionsStatement permissions={permissions} />}
-
-      {includesPlatformSpecificContent && <PlatformPicker />}
-      {includesToolSpecificContent && <ToolPicker />}
-
-      {product && (
-        <Callout variant="success" className="mb-4" dangerouslySetInnerHTML={{ __html: product }} />
-      )}
-    </>
-  )
-
-  const toc = (
-    <>
-      {isLearningPath && <LearningTrackCard track={currentLearningTrack} />}
-      {miniTocItems.length > 1 && <MiniTocs miniTocItems={miniTocItems} />}
-    </>
-  )
-
-  const articleContents = (
-    <div id="article-contents">
-      {productVideoUrl && (
-        <div className="my-2">
-          <Link id="product-video" href={productVideoUrl} target="_blank">
-            <LinkExternalIcon aria-label="(external site)" className="octicon-link mr-2" />
-            {t('video_from_transcript')}
-          </Link>
+  const renderTocItem = (item: MiniTocItem) => {
+    return (
+      <ActionList.Item
+        as="li"
+        key={item.contents}
+        className={item.platform}
+        sx={{ listStyle: 'none', padding: '2px' }}
+      >
+        <div className={cx('lh-condensed')}>
+          <div dangerouslySetInnerHTML={{ __html: item.contents }} />
+          {item.items && item.items.length > 0 ? (
+            <ul className="ml-3">{item.items.map(renderTocItem)}</ul>
+          ) : null}
         </div>
-      )}
-
-      <MarkdownContent>{renderedPage}</MarkdownContent>
-      {effectiveDate && (
-        <div className="mt-4" id="effectiveDate">
-          Effective as of:{' '}
-          <time dateTime={new Date(effectiveDate).toISOString()}>
-            {new Date(effectiveDate).toDateString()}
-          </time>
-        </div>
-      )}
-    </div>
-  )
+      </ActionList.Item>
+    )
+  }
 
   return (
     <DefaultLayout>
-      <LinkPreviewPopover />
-      {isDev && <ClientSideRefresh />}
-      {router.pathname.includes('/rest/') && <RestRedirect />}
-      {currentLayout === 'inline' ? (
-        <ArticleInlineLayout
-          supportPortalVaIframeProps={supportPortalVaIframeProps}
+      <div className="container-xl px-3 px-md-6 my-4">
+        <ArticleGridLayout
           topper={<ArticleTitle>{title}</ArticleTitle>}
-          intro={introProp}
-          toc={toc}
-          breadcrumbs={<Breadcrumbs />}
+          intro={
+            <>
+              {contributor && (
+                <Callout variant="info" className="mb-3">
+                  <p>
+                    <span className="mr-2">
+                      <InfoIcon />
+                    </span>
+                    {t('contributor_callout')} <a href={contributor.URL}>{contributor.name}</a>.
+                  </p>
+                </Callout>
+              )}
+
+              {intro && (
+                <Lead data-testid="lead" data-search="lead">
+                  {intro}
+                </Lead>
+              )}
+
+              {permissions && (
+                <div className="permissions-statement d-table">
+                  <div className="d-table-cell pr-2">
+                    <ShieldLockIcon size={16} />
+                  </div>
+                  <div className="d-table-cell" dangerouslySetInnerHTML={{ __html: permissions }} />
+                </div>
+              )}
+
+              {includesPlatformSpecificContent && <PlatformPicker variant="underlinenav" />}
+
+              {product && (
+                <Callout
+                  variant="success"
+                  className="mb-4"
+                  dangerouslySetInnerHTML={{ __html: product }}
+                />
+              )}
+            </>
+          }
+          toc={
+            <>
+              {!!interactiveAlternatives[currentPath] && (
+                <div className="flash mb-3">
+                  <ZapIcon className="mr-2" />
+                  <Link href={interactiveAlternatives[currentPath].href}>
+                    Try the new interactive article
+                  </Link>
+                </div>
+              )}
+              {miniTocItems.length > 1 && (
+                <>
+                  <Heading as="h2" fontSize={1} id="in-this-article" className="mb-1">
+                    <Link href="#in-this-article">{t('miniToc')}</Link>
+                  </Heading>
+
+                  <ActionList
+                    key={title}
+                    items={miniTocItems.map((items, i) => {
+                      return {
+                        key: title + i,
+                        text: title,
+                        renderItem: () => <ul>{renderTocItem(items)}</ul>,
+                      }
+                    })}
+                  />
+                </>
+              )}
+            </>
+          }
         >
-          {articleContents}
-        </ArticleInlineLayout>
-      ) : (
-        <div className="container-xl px-3 px-md-6 my-4">
-          <div className={cx('d-none d-xxl-block mt-3 mr-auto width-full')}>
-            <Breadcrumbs />
+          <div id="article-contents">
+            <MarkdownContent>{renderedPage}</MarkdownContent>
+            {effectiveDate && (
+              <div className="mt-4" id="effectiveDate">
+                Effective as of:{' '}
+                <time dateTime={new Date(effectiveDate).toISOString()}>
+                  {new Date(effectiveDate).toDateString()}
+                </time>
+              </div>
+            )}
           </div>
+        </ArticleGridLayout>
 
-          <ArticleGridLayout
-            supportPortalVaIframeProps={supportPortalVaIframeProps}
-            topper={<ArticleTitle>{title}</ArticleTitle>}
-            intro={introProp}
-            toc={toc}
-          >
-            {articleContents}
-          </ArticleGridLayout>
-
-          {isLearningPath ? (
-            <div className="mt-4">
-              <LearningTrackNav track={currentLearningTrack} />
-            </div>
-          ) : null}
-        </div>
-      )}
+        {currentLearningTrack?.trackName ? (
+          <div className="mt-4">
+            <LearningTrackNav track={currentLearningTrack} />
+          </div>
+        ) : null}
+      </div>
     </DefaultLayout>
   )
 }

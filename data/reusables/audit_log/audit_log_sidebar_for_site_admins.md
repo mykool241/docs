@@ -1,1 +1,2 @@
-1. In the "Archives" section of the  sidebar, click **{% octicon "log" aria-hidden="true" %} Security log**.
+3. In the left sidebar, click **Audit log**.
+![Audit log tab](/assets/images/enterprise/site-admin-settings/audit-log-tab.png)

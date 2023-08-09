@@ -25,24 +25,24 @@ Wiki history includes:
 
 {% data reusables.repositories.navigate-to-repo %}
 {% data reusables.repositories.sidebar-wiki %}
-1. Using the wiki sidebar, navigate to the page whose history you want to view.
-1. At the top of the wiki, click the revision link.
-
-   ![Screenshot of the title of a wiki page. The revision link is outlined in dark orange.](/assets/images/help/wiki/wiki-revision-link.png)
+3. Using the wiki sidebar, navigate to the page whose history you want to view.
+4. At the top of the wiki, click the revision link.
+   ![Wiki revision link](/assets/images/help/wiki/wiki_revision_link.png)
 
 ## Viewing previous content
 
-On the wiki history table, you can click a [SHA-1 hash](https://en.wikipedia.org/wiki/SHA-1)
+On the wiki history table, you can click a [SHA-1 hash](http://en.wikipedia.org/wiki/SHA-1)
 (the sequence of letters and numbers to the far right) to see a wiki page as it
 existed at a particular point in time.
 
-![Screenshot of the revisions page. The wiki's SHA number is outlined in dark orange.](/assets/images/help/wiki/wiki-sha-number.png)
+![Wiki SHA number](/assets/images/help/wiki/wiki_sha_number.png)
 
 ## Comparing two revisions
 
 1. Select two rows that you want to compare.
-1. At the top of the history table, on the right side, click **Compare Revisions**.
-1. You'll see a diff of the changes showing which lines were added, removed, and
+2. At the top of the history table, click **Compare Revisions**.
+   ![Wiki compare revisions button](/assets/images/help/wiki/wiki_compare_revisions.png)
+3. You'll see a diff of the changes showing which lines were added, removed, and
 modified.
 
 ## Reverting previous changes
@@ -50,6 +50,9 @@ modified.
 You can only revert changes if you have permission to edit the wiki.
 
 1. Select a row that you want to revert.
-1. At the top of the history table, on the right side, click **Compare Revisions**.
-1. You'll see a diff of the changes showing which lines were added, removed, and modified.
-1. To revert the newer changes, click **Revert Changes**.
+2. At the top of the history table, click **Compare Revisions**.
+   ![Wiki compare revisions button](/assets/images/help/wiki/wiki_compare_revisions.png)
+3. You'll see a diff of the changes showing which lines were added, removed, and modified.
+   ![Wiki revision diff](/assets/images/help/wiki/wiki_revision_diff.png)
+4. To revert the newer changes, click **Revert Changes**.
+   ![Wiki revert changes button](/assets/images/help/wiki/wiki_revert_changes.png)
