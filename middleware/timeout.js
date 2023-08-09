@@ -1,14 +1,12 @@
 import timeout from 'express-timeout-handler'
 
-import statsd from '../lib/statsd.js'
-
-// Heroku router requests timeout after 30 seconds. We should stop them earlier!
-const maxRequestTimeout = parseInt(process.env.REQUEST_TIMEOUT, 10) || 10000
+import statsd from '#src/observability/lib/statsd.js'
+import { MAX_REQUEST_TIMEOUT } from '../lib/constants.js'
 
 export default timeout.handler({
   // Default timeout for all endpoints
   // To override for a given router/endpoint, use `xExpressTimeoutHandler.set(...)`
-  timeout: maxRequestTimeout,
+  timeout: MAX_REQUEST_TIMEOUT,
 
   // IMPORTANT:
   // We cannot allow the middleware to disable the `res` object's methods like
@@ -16,13 +14,11 @@ export default timeout.handler({
   disable: [],
 
   onTimeout: function (req, res, next) {
-    const incrementTags = []
-    // Be careful with depending on attributes set on the `req` because
-    // under certain conditions the contextualizers might not yet have
-    // had a chance to run.
-    if (req.pagePath) {
-      incrementTags.push(`path:${req.pagePath}`)
-    }
+    // The `req.pagePath` can come later so it's not guaranteed to always
+    // be present. It's added by the `handle-next-data-path.js` middleware
+    // we translates those "cryptic" `/_next/data/...` URLs from
+    // client-side routing.
+    const incrementTags = [`path:${req.pagePath || req.path}`]
     if (req.context?.currentCategory) {
       incrementTags.push(`product:${req.context.currentCategory}`)
     }
