@@ -1,1 +1,2 @@
-1. In the "Access" section of the sidebar, click **{% octicon "id-badge" aria-hidden="true" %} Repository roles**.
+4. In the left sidebar, click **Repository roles**.
+  ![Repository roles tab in organization settings](/assets/images/help/organizations/org-settings-repository-roles.png)

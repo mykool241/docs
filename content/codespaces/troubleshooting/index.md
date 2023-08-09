@@ -1,7 +1,8 @@
 ---
-title: Troubleshooting GitHub Codespaces
+title: Troubleshooting Codespaces
 shortTitle: Troubleshooting
-intro: 'These guides provide information for troubleshooting {% data variables.product.prodname_github_codespaces %}'
+product: '{% data reusables.gated-features.codespaces %}'
+intro: 'These guides provide information for troubleshooting {% data variables.product.prodname_codespaces %}'
 versions:
   fpt: '*'
   ghec: '*'
@@ -11,17 +12,13 @@ redirect_from:
   - /github/developing-online-with-codespaces/troubleshooting-your-codespace
   - /codespaces/working-with-your-codespace/troubleshooting-your-codespace
 children:
-  - /github-codespaces-logs
-  - /troubleshooting-github-codespaces-clients
-  - /troubleshooting-included-usage
+  - /codespaces-logs
   - /exporting-changes-to-a-branch
   - /troubleshooting-creation-and-deletion-of-codespaces
-  - /troubleshooting-authentication-to-a-repository
-  - /troubleshooting-your-connection-to-github-codespaces
-  - /troubleshooting-prebuilds
-  - /troubleshooting-personalization-for-codespaces
-  - /troubleshooting-port-forwarding-for-github-codespaces
-  - /troubleshooting-gpg-verification-for-github-codespaces
-  - /working-with-support-for-github-codespaces
+  - /troubleshooting-your-connection-to-codespaces
+  - /troubleshooting-dotfiles-for-codespaces
+  - /troubleshooting-port-forwarding-for-codespaces
+  - /troubleshooting-codespaces-clients
+  - /working-with-support-for-codespaces
 ---
 

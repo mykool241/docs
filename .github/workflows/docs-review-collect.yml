@@ -7,7 +7,7 @@ name: Add docs-reviewers request to the docs-content review board
 on:
   workflow_dispatch:
   schedule:
-    - cron: '20 */6 * * *' # Run every 6 hours at 20 minutes after
+    - cron: '50 */6 * * *'
 
 permissions:
   contents: read
@@ -20,12 +20,12 @@ jobs:
 
     steps:
       - name: Check out repo content
-        uses: actions/checkout@8e5e7e5ab8b370d6c329ec480221332ada57f0ab
+        uses: actions/checkout@1e204e9a9253d643386038d443f96446fa156a97
 
-      - name: Setup Node.js
-        uses: actions/setup-node@8c91899e586c5b171469028077307d293428b516
+      - name: Setup Node
+        uses: actions/setup-node@270253e841af726300e85d718a5f606959b2903c
         with:
-          node-version-file: 'package.json'
+          node-version: 16.13.x
           cache: npm
 
       - name: Install dependencies
@@ -35,8 +35,11 @@ jobs:
         run: |
           node .github/actions-scripts/fr-add-docs-reviewers-requests.js
         env:
-          TOKEN: ${{ secrets.DOCS_BOT_PAT_WRITEORG_PROJECT }}
+          TOKEN: ${{ secrets.DOCS_BOT_FR }}
           PROJECT_NUMBER: 2936
           ORGANIZATION: 'github'
           REPO: 'github'
           REVIEWER: 'docs-reviewers'
+          # This is an educated guess of how many PRs are opened in a day on the github/github repo
+          # If we are missing PRs, either increase this number or increase the frequency at which this script is run
+          NUM_PRS: 100

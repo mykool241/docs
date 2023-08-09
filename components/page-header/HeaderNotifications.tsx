@@ -1,13 +1,11 @@
 import { useRouter } from 'next/router'
 import cx from 'classnames'
-import { XIcon } from '@primer/octicons-react'
 
-import { useLanguages } from 'components/context/LanguagesContext'
 import { useMainContext } from 'components/context/MainContext'
 import { useTranslation } from 'components/hooks/useTranslation'
 import { ExcludesNull } from 'components/lib/ExcludesNull'
 import { useVersion } from 'components/hooks/useVersion'
-import { useUserLanguage } from 'components/hooks/useUserLanguage'
+import { useLanguages } from 'components/context/LanguagesContext'
 import styles from './HeaderNotifications.module.scss'
 
 enum NotificationType {
@@ -18,48 +16,39 @@ enum NotificationType {
 
 type Notif = {
   content: string
-  type?: NotificationType
-  onClose?: () => void
+  type: NotificationType
 }
-
 export const HeaderNotifications = () => {
   const router = useRouter()
   const { currentVersion } = useVersion()
-  const { relativePath, allVersions, data, currentPathWithoutLanguage, page } = useMainContext()
-  const { userLanguage, setUserLanguageCookie } = useUserLanguage()
+  const { relativePath, allVersions, data, userLanguage, currentPathWithoutLanguage } =
+    useMainContext()
   const { languages } = useLanguages()
-
   const { t } = useTranslation('header')
 
   const translationNotices: Array<Notif> = []
-  if (router.locale === 'en') {
-    if (userLanguage && userLanguage !== 'en' && languages[userLanguage]) {
-      let href = `/${userLanguage}`
-      if (currentPathWithoutLanguage !== '/') {
-        href += currentPathWithoutLanguage
-      }
-      translationNotices.push({
-        type: NotificationType.TRANSLATION,
-        content: `This article is also available in <a href="${href}">${languages[userLanguage]?.name}</a>.`,
-        onClose: () => {
-          try {
-            setUserLanguageCookie('en')
-          } catch (err) {
-            // You can never be too careful because setting a cookie
-            // can fail. For example, some browser
-            // extensions disallow all setting of cookies and attempts
-            // at the `document.cookie` setter could throw. Just swallow
-            // and move on.
-            console.warn('Unable to set cookie', err)
-          }
-        },
-      })
-    }
-  } else {
+  if (router.locale !== 'en') {
     if (relativePath?.includes('/site-policy')) {
       translationNotices.push({
         type: NotificationType.TRANSLATION,
         content: data.reusables.policies.translation,
+      })
+    } else if (router.locale && languages[router.locale].wip !== true) {
+      translationNotices.push({
+        type: NotificationType.TRANSLATION,
+        content: t('notices.localization_complete'),
+      })
+    } else if (router.locale && languages[router.locale].wip) {
+      translationNotices.push({
+        type: NotificationType.TRANSLATION,
+        content: t('notices.localization_in_progress'),
+      })
+    }
+  } else {
+    if (userLanguage && userLanguage !== 'en' && languages[userLanguage]?.wip === false) {
+      translationNotices.push({
+        type: NotificationType.TRANSLATION,
+        content: `This article is also available in <a href="/${userLanguage}${currentPathWithoutLanguage}">${languages[userLanguage].name}</a>.`,
       })
     }
   }
@@ -80,7 +69,7 @@ export const HeaderNotifications = () => {
     ...translationNotices,
     ...releaseNotices,
     // ONEOFF EARLY ACCESS NOTICE
-    (relativePath || '').includes('early-access/') && !page.noEarlyAccessBanner
+    (relativePath || '').includes('early-access/')
       ? {
           type: NotificationType.EARLY_ACCESS,
           content: t('notices.early_access'),
@@ -90,9 +79,8 @@ export const HeaderNotifications = () => {
 
   return (
     <div>
-      {allNotifications.map(({ type, content, onClose }, i) => {
+      {allNotifications.map(({ type, content }, i) => {
         const isLast = i === allNotifications.length - 1
-
         return (
           <div
             key={content}
@@ -101,25 +89,14 @@ export const HeaderNotifications = () => {
             className={cx(
               'flash flash-banner',
               styles.container,
-              'text-center f5 color-fg-default py-4 px-6 z-1',
+              'text-center f5 color-fg-default py-4 px-6',
               type === NotificationType.TRANSLATION && 'color-bg-accent',
               type === NotificationType.RELEASE && 'color-bg-accent',
               type === NotificationType.EARLY_ACCESS && 'color-bg-danger',
-              !isLast && 'border-bottom color-border-default',
+              !isLast && 'border-bottom color-border-default'
             )}
-          >
-            {onClose && (
-              <button
-                className="flash-close js-flash-close"
-                type="button"
-                aria-label="Close"
-                onClick={() => onClose()}
-              >
-                <XIcon size="small" className="octicon mr-1" />
-              </button>
-            )}
-            <p dangerouslySetInnerHTML={{ __html: content }} />
-          </div>
+            dangerouslySetInnerHTML={{ __html: content }}
+          />
         )
       })}
     </div>

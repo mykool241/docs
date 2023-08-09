@@ -1,1 +1,1 @@
-1. Click **Publish**.
+7. Click **Publish**.

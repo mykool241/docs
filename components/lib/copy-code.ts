@@ -5,11 +5,7 @@ export default function copyCode() {
 
   buttons.forEach((button) =>
     button.addEventListener('click', async () => {
-      const codeId = (button as HTMLElement).dataset.clipboard
-      if (!codeId) return
-      const pre = document.querySelector(`pre[data-clipboard="${codeId}"]`) as HTMLElement | null
-      if (!pre) return
-      const text = pre.innerText
+      const text = (button as HTMLElement).dataset.clipboardText
       if (!text) return
       await navigator.clipboard.writeText(text)
 
@@ -19,6 +15,6 @@ export default function copyCode() {
       setTimeout(() => {
         button.setAttribute('aria-label', beforeTooltip)
       }, 2000)
-    }),
+    })
   )
 }

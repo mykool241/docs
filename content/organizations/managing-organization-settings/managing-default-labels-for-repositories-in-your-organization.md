@@ -24,7 +24,9 @@ Default labels are included in every new repository in your organization, but an
 {% data reusables.profile.access_org %}
 {% data reusables.profile.org_settings %}
 {% data reusables.organizations.repository-defaults %}
-1. Under "Repository labels", click **New label**.
+
+5. Under "Repository labels", click **New label**.
+  ![New label button](/assets/images/help/organizations/new-label-button.png)
 {% data reusables.project-management.name-label %}
 {% data reusables.project-management.label-description %}
 {% data reusables.project-management.label-color-randomizer %}
@@ -53,4 +55,4 @@ Default labels are included in every new repository in your organization, but an
 
 ## Further reading
 
-- "[AUTOTITLE](/issues/using-labels-and-milestones-to-track-work/managing-labels)"
+- "[About labels](/articles/about-labels)"

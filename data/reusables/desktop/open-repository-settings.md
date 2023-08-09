@@ -1,14 +1,14 @@
-1. In the menu bar, select **Repository**, then click **Repository settings...**.
+1. Open the **Repository** menu, then click **Repository settings...**.
 
-   {% mac %}
+  {% mac %}
 
-   ![Screenshot of the menu bar on a Mac. In the expanded "Repository" dropdown menu, a cursor hovers over "Repository Settings", highlighted in blue.](/assets/images/help/desktop/repository-settings-mac.png)
+  ![Repository settings menu option in the Mac app](/assets/images/help/desktop/mac-repository-settings.png)
 
-   {% endmac %}
+  {% endmac %}
 
-   {% windows %}
+  {% windows %}
 
-   ![Screenshot of the "GitHub Desktop" menu bar on Windows. In the open "Repository" dropdown menu, an option labeled "Repository Settings" is outlined in orange.](/assets/images/help/desktop/repository-settings-win.png)
+  ![Repository settings menu option in the Windows app](/assets/images/help/desktop/windows-repository-settings.png)
 
-   {% endwindows %}
+  {% endwindows %}
   

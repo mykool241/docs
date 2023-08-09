@@ -11,12 +11,10 @@ versions:
   ghae: '*'
   ghec: '*'
 ---
-{% for glossary in glossaries %}
-
-## {{ glossary.term }}
-
-  {{ glossary.description }}
-  
+{% for term in site.data.glossaries.external %}
+  ### {% data glossaries.external[forloop.index0].term %}
+  {% data glossaries.external[forloop.index0].description %}
+  ---
 {% endfor %}
 
 ---
@@ -24,5 +22,5 @@ versions:
 ## Further reading
 
 - [The Official Git Glossary](https://www.kernel.org/pub/software/scm/git/docs/gitglossary.html)
-- [Git documentation](https://git-scm.com/doc)
-- [Git command list](https://git-scm.com/docs)
+- [Git Reference](http://gitref.org/)
+- [Git SCM](https://git-scm.com/doc)

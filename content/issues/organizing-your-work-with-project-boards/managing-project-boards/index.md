@@ -1,9 +1,12 @@
 ---
-title: 'Managing {% data variables.product.prodname_projects_v1 %}'
-shortTitle: 'Managing {% data variables.product.prodname_projects_v1 %}'
-intro: 'Learn how to create and manage {% data variables.projects.projects_v1_boards %}'
+title: Managing project boards
+shortTitle: Managing project boards
+intro: Learn how to create and manage project boards
 versions:
-  feature: projects-v1
+  fpt: '*'
+  ghes: '*'
+  ghae: '*'
+  ghec: '*'
 topics:
   - Issues
   - Projects
@@ -21,7 +24,6 @@ children:
   - /deleting-a-project-board
 redirect_from:
   - /github/managing-your-work-on-github/managing-project-boards
-allowTitleToDifferFromFilename: true
 ---
 
 {% data reusables.projects.project_boards_old %}

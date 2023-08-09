@@ -1,1 +1,3 @@
-You can configure a pull request to merge automatically when all merge requirements are met. For more information, see "[AUTOTITLE](/pull-requests/collaborating-with-pull-requests/incorporating-changes-from-a-pull-request/automatically-merging-a-pull-request)."
+{% ifversion fpt or ghae or ghes > 3.0 or ghec %}
+You can configure a pull request to merge automatically when all merge requirements are met. For more information, see "[Automatically merging a pull request](/github/collaborating-with-issues-and-pull-requests/automatically-merging-a-pull-request)."
+{% endif %}

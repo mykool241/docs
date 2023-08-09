@@ -7,10 +7,7 @@ name: Open Enterprise release or deprecation issue
 on:
   workflow_dispatch:
   schedule:
-    - cron: '20 16 * * *' # Run every day at 16:20 UTC / 8:20 PST
-
-permissions:
-  contents: read
+    - cron: '49 14 * * *' # At 14:49 UTC daily
 
 jobs:
   open_enterprise_issue:
@@ -19,34 +16,41 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository code
-        uses: actions/checkout@8e5e7e5ab8b370d6c329ec480221332ada57f0ab
+        uses: actions/checkout@1e204e9a9253d643386038d443f96446fa156a97
 
-      - uses: ./.github/actions/node-npm-setup
+      - name: Setup Node
+        uses: actions/setup-node@270253e841af726300e85d718a5f606959b2903c
+        with:
+          node-version: 16.13.x
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
 
       - name: Check for existing release or deprecation issues
         id: existingIssue
         run: |
           .github/actions-scripts/check-for-enterprise-issues-by-label.js
         env:
-          GITHUB_TOKEN: ${{ secrets.DOCS_BOT_PAT_WRITEORG_PROJECT }}
+          GITHUB_TOKEN: ${{ secrets.DOCS_BOT_FR }}
 
       - name: Update enterprise dates
         if: steps.existingIssue.outputs.deprecationIssue == 'false' || steps.existingIssue.outputs.releaseIssue == 'false'
         run: |
-          src/ghes-releases/scripts/update-enterprise-dates.js
+          script/update-enterprise-dates.js
         env:
-          GITHUB_TOKEN: ${{ secrets.DOCS_BOT_PAT_WRITEORG_PROJECT }}
+          GITHUB_TOKEN: ${{ secrets.DOCS_BOT_FR }}
 
       - name: Create an enterprise release issue
         if: steps.existingIssue.outputs.releaseIssue == 'false'
         run: |
           .github/actions-scripts/create-enterprise-issue.js release
         env:
-          GITHUB_TOKEN: ${{ secrets.DOCS_BOT_PAT_WRITEORG_PROJECT }}
+          GITHUB_TOKEN: ${{ secrets.DOCS_BOT_FR }}
 
       - name: Create an enterprise deprecation issue
         if: steps.existingIssue.outputs.deprecationIssue == 'false'
         run: |
           .github/actions-scripts/create-enterprise-issue.js deprecation
         env:
-          GITHUB_TOKEN: ${{ secrets.DOCS_BOT_PAT_WRITEORG_PROJECT }}
+          GITHUB_TOKEN: ${{ secrets.DOCS_BOT_FR }}

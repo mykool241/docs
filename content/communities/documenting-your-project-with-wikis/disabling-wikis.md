@@ -18,8 +18,9 @@ When you turn off a wiki, the content is hidden, but not erased. If you choose t
 
 {% data reusables.repositories.navigate-to-repo %}
 {% data reusables.repositories.sidebar-settings %}
-1. Under Features, unselect **Wikis**.
+3. Under Features, unselect **Wiki**.
+  ![Wiki disable checkbox](/assets/images/help/wiki/wiki_enable_disable.png)
 
 ## Further reading
 
-- "[AUTOTITLE](/communities/documenting-your-project-with-wikis/changing-access-permissions-for-wikis)"
+- "[Changing access permissions for wikis](/communities/documenting-your-project-with-wikis/changing-access-permissions-for-wikis)"

@@ -11,9 +11,8 @@ versions:
   ghec: '*'
 children:
   - /about-github-sponsors-for-open-source-contributors
-  - /setting-up-github-sponsors-for-your-personal-account
+  - /setting-up-github-sponsors-for-your-user-account
   - /setting-up-github-sponsors-for-your-organization
-  - /using-a-fiscal-host-to-receive-github-sponsors-payouts
   - /editing-your-profile-details-for-github-sponsors
   - /managing-your-sponsorship-goal
   - /managing-your-sponsorship-tiers
@@ -23,5 +22,6 @@ children:
   - /tax-information-for-github-sponsors
   - /disabling-your-github-sponsors-account
   - /unpublishing-your-github-sponsors-profile
+  - /sponsors-for-companies
 ---
 

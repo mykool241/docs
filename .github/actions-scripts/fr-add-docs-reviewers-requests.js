@@ -1,4 +1,3 @@
-// eslint-disable-next-line import/no-extraneous-dependencies
 import { graphql } from '@octokit/graphql'
 
 import {
@@ -6,90 +5,95 @@ import {
   isDocsTeamMember,
   findFieldID,
   findSingleSelectID,
-  generateUpdateProjectV2ItemFieldMutation,
+  generateUpdateProjectNextItemFieldMutation,
 } from './projects.js'
 
-async function getAllOpenPRs() {
-  let prsRemaining = true
-  let cursor
-  let prData = []
-  while (prsRemaining) {
-    const data = await graphql(
-      `
-        query ($organization: String!, $repo: String!) {
-          repository(name: $repo, owner: $organization) {
-            pullRequests(last: 100, states: OPEN${cursor ? ` before:"${cursor}"` : ''}) {
-              pageInfo{startCursor, hasPreviousPage},
+async function run() {
+  // Get info about the docs-content review board project
+  // and about open github/github PRs
+  const data = await graphql(
+    `
+      query ($organization: String!, $repo: String!, $projectNumber: Int!, $num_prs: Int!) {
+        organization(login: $organization) {
+          projectNext(number: $projectNumber) {
+            id
+            items(last: 100) {
               nodes {
                 id
-                isDraft
-                reviewRequests(first: 10) {
-                  nodes {
-                    requestedReviewer {
-                      ... on Team {
-                        name
-                      }
-                    }
-                  }
-                }
-                labels(first: 5) {
-                  nodes {
-                    name
-                  }
-                }
-                reviews(first: 10) {
-                  nodes {
-                    onBehalfOf(first: 1) {
-                      nodes {
-                        name
-                      }
-                    }
-                  }
-                }
-                author {
-                  login
-                }
+              }
+            }
+            fields(first: 20) {
+              nodes {
+                id
+                name
+                settings
               }
             }
           }
         }
-      `,
-      {
-        organization: process.env.ORGANIZATION,
-        repo: process.env.REPO,
-        headers: {
-          authorization: `token ${process.env.TOKEN}`,
-        },
+        repository(name: $repo, owner: $organization) {
+          pullRequests(last: $num_prs, states: OPEN) {
+            nodes {
+              id
+              isDraft
+              reviewRequests(first: 10) {
+                nodes {
+                  requestedReviewer {
+                    ... on Team {
+                      name
+                    }
+                  }
+                }
+              }
+              labels(first: 5) {
+                nodes {
+                  name
+                }
+              }
+              reviews(first: 10) {
+                nodes {
+                  onBehalfOf(first: 1) {
+                    nodes {
+                      name
+                    }
+                  }
+                }
+              }
+              author {
+                login
+              }
+            }
+          }
+        }
+      }
+    `,
+    {
+      organization: process.env.ORGANIZATION,
+      repo: process.env.REPO,
+      projectNumber: parseInt(process.env.PROJECT_NUMBER),
+      num_prs: parseInt(process.env.NUM_PRS),
+      headers: {
+        authorization: `token ${process.env.TOKEN}`,
+        'GraphQL-Features': 'projects_next_graphql',
       },
-    )
-
-    prsRemaining = data.repository.pullRequests.pageInfo.hasPreviousPage
-    cursor = data.repository.pullRequests.pageInfo.startCursor
-    prData = [...prData, ...data.repository.pullRequests.nodes]
-  }
-
-  return prData
-}
-
-async function run() {
-  // Get info about open github/github PRs
-  const prData = await getAllOpenPRs()
+    }
+  )
 
   // Get the PRs that are:
   // - not draft
   // - not a train
   // - are requesting a review by docs-reviewers
   // - have not already been reviewed on behalf of docs-reviewers
-  const prs = prData.filter(
+  const prs = data.repository.pullRequests.nodes.filter(
     (pr) =>
       !pr.isDraft &&
       !pr.labels.nodes.find((label) => label.name === 'Deploy train 🚂') &&
       pr.reviewRequests.nodes.find(
-        (requestedReviewers) => requestedReviewers.requestedReviewer?.name === process.env.REVIEWER,
+        (requestedReviewers) => requestedReviewers.requestedReviewer.name === process.env.REVIEWER
       ) &&
       !pr.reviews.nodes
         .flatMap((review) => review.onBehalfOf.nodes)
-        .find((behalf) => behalf.name === process.env.REVIEWER),
+        .find((behalf) => behalf.name === process.env.REVIEWER)
   )
   if (prs.length === 0) {
     console.log('No PRs found. Exiting.')
@@ -100,70 +104,28 @@ async function run() {
   const prAuthors = prs.map((pr) => pr.author.login)
   console.log(`PRs found: ${prIDs}`)
 
-  // Get info about the docs-content review board project
-  const projectData = await graphql(
-    `
-      query ($organization: String!, $projectNumber: Int!) {
-        organization(login: $organization) {
-          projectV2(number: $projectNumber) {
-            id
-            items(last: 100) {
-              nodes {
-                id
-              }
-            }
-            fields(first: 100) {
-              nodes {
-                ... on ProjectV2Field {
-                  id
-                  name
-                }
-                ... on ProjectV2SingleSelectField {
-                  id
-                  name
-                  options {
-                    id
-                    name
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
-    `,
-    {
-      organization: process.env.ORGANIZATION,
-      projectNumber: parseInt(process.env.PROJECT_NUMBER),
-      headers: {
-        authorization: `token ${process.env.TOKEN}`,
-      },
-    },
-  )
-
   // Get the project ID
-  const projectID = projectData.organization.projectV2.id
+  const projectID = data.organization.projectNext.id
 
   // Get the IDs of the last 100 items on the board.
   // Until we have a way to check from a PR whether the PR is in a project,
   // this is how we (roughly) avoid overwriting PRs that are already on the board.
   // If we are overwriting items, query for more items.
-  const existingItemIDs = projectData.organization.projectV2.items.nodes.map((node) => node.id)
+  const existingItemIDs = data.organization.projectNext.items.nodes.map((node) => node.id)
 
   // Get the ID of the fields that we want to populate
-  const datePostedID = findFieldID('Date posted', projectData)
-  const reviewDueDateID = findFieldID('Review due date', projectData)
-  const statusID = findFieldID('Status', projectData)
-  const featureID = findFieldID('Feature', projectData)
-  const contributorTypeID = findFieldID('Contributor type', projectData)
-  const sizeTypeID = findFieldID('Size', projectData)
-  const authorID = findFieldID('Contributor', projectData)
+  const datePostedID = findFieldID('Date posted', data)
+  const reviewDueDateID = findFieldID('Review due date', data)
+  const statusID = findFieldID('Status', data)
+  const featureID = findFieldID('Feature', data)
+  const contributorTypeID = findFieldID('Contributor type', data)
+  const sizeTypeID = findFieldID('Size', data)
+  const authorID = findFieldID('Author', data)
 
   // Get the ID of the single select values that we want to set
-  const readyForReviewID = findSingleSelectID('Ready for review', 'Status', projectData)
-  const hubberTypeID = findSingleSelectID('Hubber or partner', 'Contributor type', projectData)
-  const docsMemberTypeID = findSingleSelectID('Docs team', 'Contributor type', projectData)
-  const sizeMediumID = findSingleSelectID('M', 'Size', projectData)
+  const readyForReviewID = findSingleSelectID('Ready for review', 'Status', data)
+  const hubberTypeID = findSingleSelectID('Hubber or partner', 'Contributor type', data)
+  const docsMemberTypeID = findSingleSelectID('Docs team', 'Contributor type', data)
 
   // Add the PRs to the project
   const itemIDs = await addItemsToProject(prIDs, projectID)
@@ -172,8 +134,8 @@ async function run() {
   // Exclude existing items going forward.
   // Until we have a way to check from a PR whether the PR is in a project,
   // this is how we (roughly) avoid overwriting PRs that are already on the board
-  const newItemIDs = []
-  const newItemAuthors = []
+  let newItemIDs = []
+  let newItemAuthors = []
   itemIDs.forEach((id, index) => {
     if (!existingItemIDs.includes(id)) {
       newItemIDs.push(id)
@@ -189,7 +151,7 @@ async function run() {
   // Populate fields for the new project items
   // (Using for...of instead of forEach since the function uses await)
   for (const [index, itemID] of newItemIDs.entries()) {
-    const updateProjectV2ItemMutation = generateUpdateProjectV2ItemFieldMutation({
+    const updateProjectNextItemMutation = generateUpdateProjectNextItemFieldMutation({
       item: itemID,
       author: newItemAuthors[index],
       turnaround: 2,
@@ -200,20 +162,21 @@ async function run() {
       : hubberTypeID
     console.log(`Populating fields for item: ${itemID} with author ${newItemAuthors[index]}`)
 
-    await graphql(updateProjectV2ItemMutation, {
+    await graphql(updateProjectNextItemMutation, {
       project: projectID,
-      statusID,
+      statusID: statusID,
       statusValueID: readyForReviewID,
-      datePostedID,
-      reviewDueDateID,
-      contributorTypeID,
-      contributorType,
-      sizeTypeID,
-      sizeType: sizeMediumID, // We need to provide something here, defaulting to 'medium' or 'M'
-      featureID,
-      authorID,
+      datePostedID: datePostedID,
+      reviewDueDateID: reviewDueDateID,
+      contributorTypeID: contributorTypeID,
+      contributorType: contributorType,
+      sizeTypeID: sizeTypeID,
+      sizeType: '', // Although we aren't populating size, we are passing the variable so that we can use the shared mutation function
+      featureID: featureID,
+      authorID: authorID,
       headers: {
         authorization: `token ${process.env.TOKEN}`,
+        'GraphQL-Features': 'projects_next_graphql',
       },
     })
     console.log('Done populating fields for item')

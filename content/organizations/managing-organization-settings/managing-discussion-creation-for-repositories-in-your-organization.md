@@ -5,11 +5,12 @@ redirect_from:
   - /github/setting-up-and-managing-organizations-and-teams/managing-discussion-creation-for-repositories-in-your-organization
 permissions: Organization owners can manage discussion creation for repositories owned by the organization.
 versions:
-  feature: discussions
+  fpt: '*'
+  ghec: '*'
 topics:
   - Organizations
   - Teams
-shortTitle: Manage repository discussions
+shortTitle: Manage discussion creation
 ---
 
 
@@ -20,11 +21,12 @@ By default, organization members with read access can create discussions if a re
 {% data reusables.profile.access_org %}
 {% data reusables.profile.org_settings %}
 {% data reusables.organizations.member-privileges %}
-1. In the "Admin repository permissions" section, under "Repository discussions", select or deselect **Allow users with read access to create discussions**.
-1. Click **Save**.
+5. Under "Repository discussions", select or deselect **Allow users with read access to create discussions**.
+  ![Checkbox to allow people with read access to create discussions](/assets/images/help/discussions/toggle-allow-users-with-read-access-checkbox.png)
+6. Click **Save**.
+  !["Save" button for discussions settings](/assets/images/help/discussions/click-save.png)
 
 ## Further reading
 
-- "[AUTOTITLE](/discussions/collaborating-with-your-community-using-discussions/about-discussions)"
-- "[AUTOTITLE](/discussions/managing-discussions-for-your-community)"
-- "[AUTOTITLE](/organizations/managing-organization-settings/enabling-or-disabling-github-discussions-for-an-organization)"
+- "[About discussions](/discussions/collaborating-with-your-community-using-discussions/about-discussions)"
+- "[Managing discussions for your community](/discussions/managing-discussions-for-your-community)"

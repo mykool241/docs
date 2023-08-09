@@ -11,9 +11,6 @@ on:
       - transferred
       - reopened
 
-permissions:
-  contents: none
-
 jobs:
   transfer_issue:
     runs-on: ubuntu-latest
@@ -21,12 +18,12 @@ jobs:
     if: github.repository == 'github/docs-internal'
     steps:
       - id: move_to_correct_repo
-        uses: actions/github-script@98814c53be79b1d30f795b907e553d8679345975
+        uses: actions/github-script@2b34a689ec86a68d8ab9478298f91d5401337b7d
         env:
           TEAM_ENGINEERING_REPO: ${{ secrets.TEAM_ENGINEERING_REPO }}
           TEAM_CONTENT_REPO: ${{ secrets.TEAM_CONTENT_REPO }}
         with:
-          github-token: ${{ secrets.DOCS_BOT_PAT_WORKFLOW_READORG }}
+          github-token: ${{ secrets.DOCUBOT_READORG_REPO_WORKFLOW_SCOPES }}
           script: |
             const issueNo = context.issue.number
             const owner = 'github'
@@ -41,13 +38,13 @@ jobs:
               correctRepo = process.env.TEAM_ENGINEERING_REPO
             }
 
-            const correctRepoObject = await github.rest.repos.get({
+            const correctRepoObject = await github.repos.get({
               owner: owner,
               repo: correctRepo
             })
 
             // Post a comment in the docs-internal issue
-            await github.rest.issues.createComment({
+            await github.issues.createComment({
               owner: owner,
               repo: originalRepo,
               issue_number: issueNo,
@@ -82,7 +79,7 @@ jobs:
 
             // Add the same labels to the new issue
             const newIssueNumber = graph.transferIssue.issue.number
-            await github.rest.issues.addLabels({
+            await github.issues.addLabels({
               owner: owner,
               repo: correctRepo,
               issue_number: newIssueNumber,

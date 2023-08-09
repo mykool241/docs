@@ -1,1 +1,2 @@
-1. In the left sidebar, click **{% data variables.product.prodname_github_apps %}**.
+1. In the left sidebar, click **GitHub Apps**.
+![GitHub Apps section](/assets/images/settings/github_apps.png)

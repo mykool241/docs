@@ -1,7 +1,4 @@
 #!/usr/bin/env node
-import crypto from 'crypto'
-import fs from 'fs/promises'
-
 import Github from './github.js'
 const github = Github()
 
@@ -53,7 +50,7 @@ export async function getTreeSha(owner, repo, commitSha) {
 }
 
 // https://docs.github.com/rest/reference/git#get-a-tree
-export async function getTree(owner, repo, ref) {
+export async function getTree(owner, repo, ref, allowedPaths = []) {
   const commitSha = await getCommitSha(owner, repo, ref)
   const treeSha = await getTreeSha(owner, repo, commitSha)
   try {
@@ -73,11 +70,11 @@ export async function getTree(owner, repo, ref) {
 }
 
 // https://docs.github.com/rest/reference/git#get-a-blob
-export async function getContentsForBlob(owner, repo, sha) {
+export async function getContentsForBlob(owner, repo, blob) {
   const { data } = await github.git.getBlob({
     owner,
     repo,
-    file_sha: sha,
+    file_sha: blob.sha,
   })
   // decode blob contents
   return Buffer.from(data.content, 'base64')
@@ -92,13 +89,7 @@ export async function getContents(owner, repo, ref, path) {
       ref,
       path,
     })
-
-    if (!data.content) {
-      const blob = await getContentsForBlob(owner, repo, data.sha)
-      // decode Base64 encoded contents
-      return Buffer.from(blob, 'base64').toString()
-    }
-    // decode Base64 encoded contents
+    // decode contents
     return Buffer.from(data.content, 'base64').toString()
   } catch (err) {
     console.log(`error getting ${path} from ${owner}/${repo} at ref ${ref}`)
@@ -137,12 +128,7 @@ export async function createIssueComment(owner, repo, pullNumber, body) {
 }
 
 // Search for a string in a file in code and return the array of paths to files that contain string
-export async function getPathsWithMatchingStrings(
-  strArr,
-  org,
-  repo,
-  { cache = true, forceDownload = false } = {},
-) {
+export async function getPathsWithMatchingStrings(strArr, org, repo) {
   const perPage = 100
   const paths = new Set()
 
@@ -154,7 +140,7 @@ export async function getPathsWithMatchingStrings(
       let currentCount = 0
 
       do {
-        const data = await searchCode(q, perPage, currentPage, cache, forceDownload)
+        const data = await searchCode(q, perPage, currentPage)
         data.items.map((el) => paths.add(el.path))
         totalCount = data.total_count
         currentCount += data.items.length
@@ -169,34 +155,13 @@ export async function getPathsWithMatchingStrings(
   return paths
 }
 
-async function searchCode(q, perPage, currentPage, cache = true, forceDownload = false) {
-  const cacheKey = `searchCode-${q}-${perPage}-${currentPage}`
-  const tempFilename = `/tmp/searchCode-${crypto
-    .createHash('md5')
-    .update(cacheKey)
-    .digest('hex')}.json`
-
-  if (!forceDownload && cache) {
-    try {
-      return JSON.parse(await fs.readFile(tempFilename, 'utf8'))
-    } catch (error) {
-      if (error.code !== 'ENOENT') {
-        throw error
-      }
-      console.log(`Cache miss on ${tempFilename} (${cacheKey})`)
-    }
-  }
-
+async function searchCode(q, perPage, currentPage) {
   try {
     const { data } = await secondaryRateLimitRetry(github.rest.search.code, {
       q,
       per_page: perPage,
       page: currentPage,
     })
-    if (cache) {
-      await fs.writeFile(tempFilename, JSON.stringify(data))
-      console.log(`Wrote search results to ${tempFilename}`)
-    }
 
     return data
   } catch (err) {
@@ -205,7 +170,7 @@ async function searchCode(q, perPage, currentPage, cache = true, forceDownload =
   }
 }
 
-async function secondaryRateLimitRetry(callable, args, maxAttempts = 10, sleepTime = 1000) {
+async function secondaryRateLimitRetry(callable, args, maxAttempts = 5) {
   try {
     const response = await callable(args)
     return response
@@ -220,6 +185,7 @@ async function secondaryRateLimitRetry(callable, args, maxAttempts = 10, sleepTi
     //
     // Let's look for that an manually self-recurse, under certain conditions
     const lookFor = 'You have exceeded a secondary rate limit.'
+    const sleepTime = 5000 // ms
     if (
       err.status &&
       err.status === 403 &&
@@ -229,11 +195,11 @@ async function secondaryRateLimitRetry(callable, args, maxAttempts = 10, sleepTi
       console.warn(
         `Got secondary rate limit blocked. Sleeping for ${
           sleepTime / 1000
-        } seconds. (attempts left: ${maxAttempts})`,
+        } seconds. (attempts left: ${maxAttempts})`
       )
       return new Promise((resolve) => {
         setTimeout(() => {
-          resolve(secondaryRateLimitRetry(callable, args, maxAttempts - 1, sleepTime * 2))
+          resolve(secondaryRateLimitRetry(callable, args, maxAttempts - 1))
         }, sleepTime)
       })
     }

@@ -3,7 +3,8 @@ import path from 'path'
 import fs from 'fs'
 import yaml from 'js-yaml'
 import flat from 'flat'
-import { chain, get } from 'lodash-es'
+import { chain, difference, get } from 'lodash-es'
+import allowedActions from '../../.github/allowed-actions.js'
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const workflowsDir = path.join(__dirname, '../../.github/workflows')
 const workflows = fs
@@ -27,32 +28,31 @@ const scheduledWorkflows = workflows
   .flat()
   .map((schedule) => schedule.cron)
 
-const allUsedActions = chain(workflows)
-  .map(actionsUsedInWorkflow)
-  .flatten()
-  .uniq()
-  .filter((use) => !use.startsWith('.'))
-  .sort()
-  .value()
+const allUsedActions = chain(workflows).map(actionsUsedInWorkflow).flatten().uniq().sort().value()
 
 describe('GitHub Actions workflows', () => {
-  test('all used actions are listed', () => {
+  test('all used actions are allowed in .github/allowed-actions.js', () => {
     expect(allUsedActions.length).toBeGreaterThan(0)
+    const unusedActions = difference(allowedActions, allUsedActions)
+    expect(unusedActions).toEqual([])
   })
 
-  test.each(allUsedActions)('requires specific hash: %p', (actionName) => {
-    const actionRegexp = /^[A-Za-z0-9-/]+@[0-9a-f]{40}$/
-    expect(actionName).toMatch(actionRegexp)
+  test('all allowed actions by .github/allowed-actions.js are used by at least one workflow', () => {
+    expect(allowedActions.length).toBeGreaterThan(0)
+    const disallowedActions = difference(allUsedActions, allowedActions)
+    expect(disallowedActions).toEqual([])
   })
 
-  test('all scheduled workflows run at 20 minutes past', () => {
-    const twenties = scheduledWorkflows.filter((schedule) => /^20/.test(schedule))
-    expect(twenties.length).toEqual(scheduledWorkflows.length)
+  test('no scheduled workflows run on the hour', () => {
+    const hourlySchedules = scheduledWorkflows.filter((schedule) => {
+      const hour = schedule.split(' ')[0]
+      // return any minute cron segments that equal 0, 00, 000, etc.
+      return !/[^0]/.test(hour)
+    })
+    expect(hourlySchedules).toEqual([])
   })
 
-  test('all daily and weekly workflows run at 16:20 UTC / 8:20 PST', () => {
-    const dailies = scheduledWorkflows.filter((schedule) => /^20 \d{2}/.test(schedule))
-    const sixteens = dailies.filter((schedule) => /^20 16/.test(schedule))
-    expect(sixteens.length).toEqual(dailies.length)
+  test('all scheduled workflows run at unique times', () => {
+    expect(scheduledWorkflows.length).toEqual(new Set(scheduledWorkflows).size)
   })
 })

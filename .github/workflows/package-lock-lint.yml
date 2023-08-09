@@ -14,24 +14,17 @@ on:
 permissions:
   contents: read
 
-# This allows a subsequently queued workflow run to interrupt previous runs
-concurrency:
-  group: '${{ github.workflow }} @ ${{ github.event.pull_request.head.label || github.head_ref || github.ref }}'
-  cancel-in-progress: true
-
 jobs:
   lint:
     runs-on: ubuntu-latest
-    if: github.repository == 'github/docs-internal' || github.repository == 'github/docs'
     steps:
       - name: Check out repo
-        uses: actions/checkout@8e5e7e5ab8b370d6c329ec480221332ada57f0ab
+        uses: actions/checkout@1e204e9a9253d643386038d443f96446fa156a97
 
-      - name: Setup Node.js
-        uses: actions/setup-node@8c91899e586c5b171469028077307d293428b516
+      - name: Setup Node
+        uses: actions/setup-node@270253e841af726300e85d718a5f606959b2903c
         with:
-          node-version-file: 'package.json'
-          cache: npm
+          node-version: 16.x
 
       - name: Run check
         run: |
@@ -43,7 +36,7 @@ jobs:
           #   package-lock.json, instead of checking node_modules and
           #   downloading dependencies.
           #
-          npm install --package-lock-only --ignore-scripts --include=optional
+          npm install --package-lock-only --ignore-scripts
 
           # If the package.json (dependencies and devDependencies) is
           # in correct sync with package-lock.json running the above command

@@ -1,10 +1,11 @@
 import { createContext, useContext } from 'react'
 
-export type LanguageItem = {
-  wip?: boolean
+type LanguageItem = {
   name: string
   nativeName?: string
   code: string
+  hreflang: string
+  wip?: boolean
 }
 
 export type LanguagesContextT = {
