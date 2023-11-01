@@ -73,7 +73,7 @@ jobs:
         run: npm install --no-save --include=optional esm
 
       - name: Undeploy
-        uses: actions/github-script@2b34a689ec86a68d8ab9478298f91d5401337b7d
+        uses: actions/github-script@6b5d3eac1fb48c23fcd665e5a63baced5392d8ce
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           HEROKU_API_TOKEN: ${{ secrets.HEROKU_API_TOKEN }}
